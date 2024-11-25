@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct { //Datenstruktur für das Datum
     int tag;
@@ -54,11 +55,43 @@ Datum eingabeDatum (char *prompt) {
 //Funktion zu Eingabe der Stundent
 
 
-Student  *eingabeStudent () {
-    Student *neuerStudent = ()
-        
+Student *inputStudent() {
+    Student *neuerStudent = (Student *)malloc(sizeof(Student));
+    if (!neuerStudent) {
+        printf("Speicher konnte nicht reserviert werden.\n");
+        exit(EXIT_FAILURE);
+    }
 
+    printf("Vorname: ");
+    scanf("%50s", neuerStudent->vorname);
 
+    printf("Nachname: ");
+    scanf("%50s", neuerStudent->nachname);
+
+    printf("Studiengang: ");
+    scanf("%50s", neuerStudent->studiengang);
+
+    while (1) {
+        printf("Matrikelnummer max 8 Ziffern: ");
+        scanf("%8s", neuerStudent->matrikelnummer);
+        if (strlen(neuerStudent->matrikelnummer) == 8 && isdigit(neuerStudent->matrikelnummer[0]) break; //prüft ob das eingebene eine Ziffer ist
+        printf("Keine Gültige Martikelnummer.\n");
+    }
+
+    neuerStudent->geburtsdatum = eingabeDatum("Geburtsdatum");
+    neuerStudent->startdatum = eingabeDatum("Startdatum");
+    neuerStudent->enddatum = eingabeDatum("Enddatum");
+    neuerStudent->next = NULL;
+
+    return neuerStudent;
+}
+
+// add Student
+void addStudent(Student *neuerStudent) {
+    neuerStudent->next = head;
+    head = neuerStudent;
+    printf("Student wurde hinzugefügt\n");
+}
 
 
 //add Student (David)
