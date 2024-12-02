@@ -67,6 +67,58 @@ void readCSVAndAddStudents(char *filename) {
     fclose(file);
 }
 
+int count_student(Student *student, int counter)
+{
+	if(student->nextStudent == NULL)
+		return counter;
+	return count_student(student->nextStudent, counter++);
+}
+
+void print_student_info(Student *student)
+{
+	printf("nachname: %s", student->nachname);
+	printf("vorname: %s", student->vorname);
+	printf("studiengang: %s", student->studiengang);
+	printf("matrikelnummer: %s", student->matrikelnummer);
+	Datum date = student->geburtstag;
+	printf("geburtstag: %02d. %02d. %d", date.tag, date.monat, date.jahr);
+	date = student->startdatum;
+	printf("startdatum: %02d. %02d. %d", date.tag, date.monat, date.jahr);
+	date = student->enddatum;
+	printf("enddatum: %02d. %02d. %d", date.tag, date.monat, date.jahr);
+}
+
+void print_student(Student *student, char matrikelnummer[9])
+{
+	if(strcmp(matrikelnummer, student->matrikelnummer) == 0)
+		print_student_info(student);
+	else if(student->nextStudent == NULL)
+		 printf("student not found");
+	else
+		print_student(student->nextStudent, matrikelnummer);
+}
+
+void print_all_student(Student *student)
+{
+	if(student->nextStudent != NULL){
+		print_student_info(student);
+		print_all_student(student->nextStudent);
+	}
+}
+
+void delete_student(Student *student, char matrikelnummer[9])
+{
+	if(strcmp(matrikelnummer, student->matrikelnummer) == 0){
+		Student *nextnext = student->nextStudent->nextStudent;
+		free(student->nextStudent);
+		student->nextStudent = nextnext;
+	}
+	else if(student->nextStudent == NULL)
+		 printf("student not found");
+	else
+		print_student(student->nextStudent, matrikelnummer);
+}
+
 int main() {
     // Specify the path to your CSV file here
     const char *csvFilePath = "students.csv"; // Path to CSV file -> Paste the Path where the CSV File is
