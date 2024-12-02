@@ -38,3 +38,13 @@ Student* inputStudentFromCSV(FILE *file);
 void addStudent(Student *neuerStudent);
 
 void readCSVAndAddStudents(char *filename);
+
+int count_student(Student *student, int counter);
+
+void print_student(Student *student, char matrikelnummer[9]);
+
+void print_student_info(Student *student);
+
+void print_all_student(Student *student);
+
+void delete_student(Student *student, char matrikelnummer[9]);
