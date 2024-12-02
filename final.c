@@ -4,106 +4,98 @@
 #include <string.h>
 #include <ctype.h>
 
-typedef struct { //Datenstruktur für das Datum
+typedef struct { // Datenstruktur für das Datum
     int tag;
     int monat;
     int jahr;
 } Datum;
 
-typedef struct { //Datenstruktur für Studenten
-
+typedef struct { // Datenstruktur für Studenten
     char nachname[51];
     char vorname[51];
     char studiengang[51];
-    char martikelnummer[9];
+    char matrikelnummer[9];
     Datum geburtstag;
     Datum startdatum;
     Datum enddatum;
-    Student *nextStudent; // Zuweisung des Zeigers auf die nächste Studentenstruktur
-
-    } Student;
+    struct Student *nextStudent; // Zuweisung des Zeigers auf die nächste Studentenstruktur
+} Student;
 
 Student *head = NULL;
 
-int validesDatum (int monat, int tag, int jahr) {
+int validesDatum(int monat, int tag, int jahr) {
+    if (jahr > 1970 || monat < 1 || monat > 12 || tag < 1 || tag > 31) return 0;
 
-    if (jahr > 1970 || monat > 1 || monat  < 12 || tag > 1) return 0;    
-     {
-
-        int maxTage [] = {31, 28, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31 }; //Überprüfung der max.Tage jedes Monates
-        if ((jahr % 4 == 0 && jahr % 100 !=0) ||  jahr % 400 == 0) maxTage[1] = 29; //Schaltjahr berechnung
-        return tag <=  maxTage[monat - 1]; 
-
+    int maxTage[] = {31, 28, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31};
+    if ((jahr % 4 == 0 && jahr % 100 != 0) || jahr % 400 == 0) maxTage[1] = 29; // Schaltjahrberechnung
+    return tag <= maxTage[monat - 1];
 }
 
-Datum eingabeDatum (char *prompt) {
-
+Datum stringToDate(char *dateStr) {
     Datum datum;
-
-    while (1)
-    {
-        printf("%s (TT.MM.JJJJ)") : " ", prompt);
-        scanf("%d, %d, %d", &datum.tag, &datum.monat, &datum.jahr);
-        if(validesDatum(datum.tag,  datum.monat, datum.jahr)) break;
-        printf("Ungültiges Datum: Geben sie es erneut ein:");
-        return Datum; 
-    }
-    
-
+    sscanf(dateStr, "%d.%d.%d", &datum.tag, &datum.monat, &datum.jahr);
+    return datum;
 }
 
-//Funktion zu Eingabe der Stundent
-
-
-Student *inputStudent() {
+Student* inputStudentFromCSV(FILE *file) {
     Student *neuerStudent = (Student *)malloc(sizeof(Student));
     if (!neuerStudent) {
-        printf("Speicher konnte nicht reserviert werden.\n");
         exit(EXIT_FAILURE);
     }
 
-    printf("Vorname: ");
-    scanf("%50s", neuerStudent->vorname);
+    char geburtsdatumStr[11], startdatumStr[11], enddatumStr[11];
 
-    printf("Nachname: ");
-    scanf("%50s", neuerStudent->nachname);
-
-    printf("Studiengang: ");
-    scanf("%50s", neuerStudent->studiengang);
-
-    while (1) {
-        printf("Matrikelnummer max 8 Ziffern: ");
-        scanf("%8s", neuerStudent->matrikelnummer);
-        if (strlen(neuerStudent->matrikelnummer) == 8 && isdigit(neuerStudent->matrikelnummer[0]) break; //prüft ob das eingebene eine Ziffer ist
-        printf("Keine Gültige Martikelnummer.\n");
+    // Read data from the CSV line (assuming proper CSV format)
+    if (fscanf(file, "%50[^,],%50[^,],%50[^,],%8s,%10s,%10s,%10s\n", 
+               neuerStudent->vorname, neuerStudent->nachname, neuerStudent->studiengang, 
+               neuerStudent->matrikelnummer, geburtsdatumStr, startdatumStr, enddatumStr) != 7) {
+        free(neuerStudent);
+        return NULL;
     }
 
-    neuerStudent->geburtsdatum = eingabeDatum("Geburtsdatum");
-    neuerStudent->startdatum = eingabeDatum("Startdatum");
-    neuerStudent->enddatum = eingabeDatum("Enddatum");
-    neuerStudent->next = NULL;
+    // Convert string dates to Datum structure
+    neuerStudent->geburtstag = stringToDate(geburtsdatumStr);
+    neuerStudent->startdatum = stringToDate(startdatumStr);
+    neuerStudent->enddatum = stringToDate(enddatumStr);
+
+    neuerStudent->nextStudent = NULL;
 
     return neuerStudent;
 }
 
-// add Student
 void addStudent(Student *neuerStudent) {
-    neuerStudent->next = head;
+    neuerStudent->nextStudent = head;
     head = neuerStudent;
     printf("Student wurde hinzugefügt\n");
 }
 
+void readCSVAndAddStudents(char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        return;
+    }
 
-//add Student (David)
+    char line[256]; // Buffer for the header line
+    // Read header line, assuming it exists and is valid
+    fgets(line, sizeof(line), file);
 
+    while (1) {
+        Student *neuerStudent = inputStudentFromCSV(file);
+        if (neuerStudent == NULL) break; // Stop when no more students are found
+        addStudent(neuerStudent);
+    }
 
-//count Students (Ilian, Sasi)
-//print Studenten Martikelnummer
-//print all Students
-//delete Student Martikelnummer
+    fclose(file);
+}
 
+int main() {
+    // Specify the path to your CSV file here
+    const char *csvFilePath = "students.csv"; // Path to CSV file -> Paste the Path where the CSV File is
 
+    // Read CSV and add students at the start
+    readCSVAndAddStudents(csvFilePath);
 
-// save (Jan)
-//read (Sebastian)
-
+    // Now, you can proceed with the rest of your program (e.g., interacting with students)
+    // Your existing code can be executed here
+    return 0;
+}
