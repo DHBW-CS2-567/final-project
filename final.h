@@ -26,6 +26,7 @@ typedef struct student{ // Datenstruktur für Studenten
 int validesDatum(int monat, int tag, int jahr);
 
 Datum stringToDate(char *dateStr);
+int checkDate(Datum date);
 
 Student* inputStudentFromCSV(FILE *file);
 
@@ -36,6 +37,7 @@ Datum stringToDate(char *dateStr);
 Student* inputStudentFromCSV(FILE *file);
 
 void addStudent(Student *neuerStudent);
+void addingWizard();
 
 void readCSVAndAddStudents(char *filename);
 
@@ -48,3 +50,5 @@ void print_student_info(Student *student);
 void print_all_student(Student *student);
 
 void delete_student(Student *student, char matrikelnummer[9]);
+
+void print_help(const char *program_name);
