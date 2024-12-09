@@ -125,7 +125,7 @@ void addingWizard()
     student_tmp.enddatum = enddatum;
     student_tmp.nextStudent = NULL;
 
-	print_student_info(&student_tmp);
+	addStudent(&student_tmp);
 }
 
 void readCSVAndAddStudents(char *filename) {
@@ -204,17 +204,42 @@ void print_help(const char *program_name)
 	printf("%s --help\t\t\tprint the help\n", program_name);
 	printf("%s add\t\t\tstart the adding wizard\n", program_name);
 	printf("%s amount\t\t\tget the student amount\n", program_name);
+	printf("%s get {matrikelnummer}\t\t\tget the student with matrikelnummer\n", program_name);
+	printf("%s getAll \t\t\tget all students\n", program_name);
+	printf("%s delete {matrikelnummer} \t\t\tdelete student with matrikelnummer\n", program_name);
 }
 
 int main(int argc, char *argv[]) {
 	Student *root = NULL;
+	if(argc == 1)
+		print_help(argv[0]);
 	if(argc>=2){
 		if(strcmp(argv[1], "--help") == 0)
 			print_help(argv[0]);
-		if(strcmp(argv[1], "add") == 0)
+		else if(strcmp(argv[1], "add") == 0)
 			addingWizard();
-		if(strcmp(argv[1], "amount") == 0)
-			count_student(root, 0);
+		else if(strcmp(argv[1], "amount") == 0){
+			if(root == NULL)
+				printf("0\n");
+			else count_student(root, 0);
+		}
+		else if(root == NULL)
+				printf("Add a student first\n");
+		else{
+			if(strcmp(argv[1], "get") == 0){
+				if(argc>=3)
+					print_student(root, argv[2]);
+				else printf("you need to do %s get {matrikelnummer}\n", argv[0]);
+				//TODO: ; matrikelnummer has to be a number
+			}
+			else if(strcmp(argv[1], "getAll") == 0)
+				print_all_student(root);
+			else if(strcmp(argv[1], "delete") == 0){
+				if(argc>=3)
+					delete_student(root, argv[2]);
+				else printf("you need to do %s delete {matrikelnummer}\n", argv[0]);
+			}
+		}
 	}
 
 	// Specify the path to your CSV file here
