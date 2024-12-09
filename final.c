@@ -199,45 +199,88 @@ void delete_student(Student *student, char matrikelnummer[9])
 		print_student(student->nextStudent, matrikelnummer);
 }
 
-void print_help(const char *program_name)
+void print_help()
 {
-	printf("%s --help\t\t\tprint the help\n", program_name);
-	printf("%s add\t\t\tstart the adding wizard\n", program_name);
-	printf("%s amount\t\t\tget the student amount\n", program_name);
-	printf("%s get {matrikelnummer}\t\t\tget the student with matrikelnummer\n", program_name);
-	printf("%s getAll \t\t\tget all students\n", program_name);
-	printf("%s delete {matrikelnummer} \t\t\tdelete student with matrikelnummer\n", program_name);
+	printf("press Ctrl-C to exit\n");
+	printf("help\t\t\t\tprint the help\n");
+	printf("add\t\t\t\tstart the adding wizard\n");
+	printf("amount\t\t\t\tget the student amount\n");
+	printf("get {matrikelnummer}\t\tget the student with matrikelnummer\n");
+	printf("getAll \t\t\t\tget all students\n");
+	printf("delete {matrikelnummer}\t\tdelete student with matrikelnummer\n");
 }
 
 int main(int argc, char *argv[]) {
-	Student *root = NULL;
-	if(argc == 1)
-		print_help(argv[0]);
-	if(argc>=2){
-		if(strcmp(argv[1], "--help") == 0)
-			print_help(argv[0]);
-		else if(strcmp(argv[1], "add") == 0)
-			addingWizard();
-		else if(strcmp(argv[1], "amount") == 0){
-			if(root == NULL)
-				printf("0\n");
-			else count_student(root, 0);
+	print_help();
+	while(1){
+		char* line = NULL;
+		size_t len = 0;
+		ssize_t nread;
+		nread = getline(&line, &len, stdin);
+		if(nread == -1) {
+			perror("couldnt read the line");
+			free(line);
+			continue;
 		}
-		else if(root == NULL)
-				printf("Add a student first\n");
-		else{
-			if(strcmp(argv[1], "get") == 0){
-				if(argc>=3)
-					print_student(root, argv[2]);
-				else printf("you need to do %s get {matrikelnummer}\n", argv[0]);
-				//TODO: ; matrikelnummer has to be a number
+
+		if (line[nread - 1] == '\n') {
+			line[nread - 1] = '\0';
+			nread--;
+		}
+
+		size_t w_count = 0;
+		size_t w_capacity = 3;
+		char **words = malloc(w_capacity * sizeof(char *));
+		if(!words){
+			perror("couldnt malloc to words");
+			free(line);
+			continue;
+		}
+
+		char * token = strtok(line, " ");
+		char failed_in_loop = 0;
+		while(token != NULL){
+			if (w_count >= w_capacity){
+				w_capacity *= 2;
+				words = realloc(words, w_capacity * sizeof(char*));
+				if(!words){
+					perror("couldnt realloc to words");
+					free(line);
+					failed_in_loop = 1;
+					break;
+				}
 			}
-			else if(strcmp(argv[1], "getAll") == 0)
-				print_all_student(root);
-			else if(strcmp(argv[1], "delete") == 0){
-				if(argc>=3)
-					delete_student(root, argv[2]);
-				else printf("you need to do %s delete {matrikelnummer}\n", argv[0]);
+			words[w_count++] = strdup(token);
+			token = strtok(NULL, " ");
+		}
+		if(failed_in_loop)
+			continue;
+		if(w_count>=1){
+			if(strcmp(words[0], "help") == 0)
+				print_help();
+			else if(strcmp(words[0], "add") == 0)
+				addingWizard();
+			else if(strcmp(words[0], "amount") == 0){
+				if(head == NULL)
+					printf("0\n");
+				else count_student(head, 0);
+			}
+			else if(head == NULL)
+				printf("Add a student first\n");
+			else{
+				if(strcmp(words[0], "get") == 0){
+					if(w_count>=2)
+						print_student(head, words[1]);
+					else printf("you need to do get {matrikelnummer}\n");
+					//TODO: ; matrikelnummer has to be a number
+				}
+				else if(strcmp(words[1], "getAll") == 0)
+					print_all_student(head);
+				else if(strcmp(words[1], "delete") == 0){
+					if(w_count>=2)
+						delete_student(head, words[2]);
+					else printf("you need to do delete {matrikelnummer}\n");
+				}
 			}
 		}
 	}
@@ -252,3 +295,6 @@ int main(int argc, char *argv[]) {
 	// Your existing code can be executed here
 	return 0;
 }
+
+//TODO: check if start date is after birth date and end date is after start date
+//FIXME: Adding or printing does not really work debugging required

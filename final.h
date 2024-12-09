@@ -51,4 +51,4 @@ void print_all_student(Student *student);
 
 void delete_student(Student *student, char matrikelnummer[9]);
 
-void print_help(const char *program_name);
+void print_help();
